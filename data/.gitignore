@@ -1,0 +1,3 @@
+# Keep data directories but don't track raw data files
+*.json
+!site/data/.gitkeep

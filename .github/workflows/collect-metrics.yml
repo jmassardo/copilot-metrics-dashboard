@@ -1,0 +1,107 @@
+# Copilot Metrics Dashboard - GitHub Actions Workflow
+#
+# Runs nightly to:
+# 1. Collect Copilot usage metrics and seat data
+# 2. Collect PR health metrics across tracked repos
+# 3. Collect issue lifecycle metrics across tracked repos
+# 4. Aggregate historical data and generate alerts
+# 5. Build and deploy the static dashboard to GitHub Pages
+#
+# Required secrets:
+#   METRICS_GITHUB_TOKEN - A PAT or GitHub App token with these scopes:
+#     - manage_billing:copilot (for Copilot metrics and seat data)
+#     - repo (for PR and issue data on private repos)
+#     - read:org (for org repo discovery)
+#
+# Required variables:
+#   GITHUB_ORG - The organization name to collect metrics for
+#
+# Optional variables:
+#   GITHUB_REPOS - Comma-separated list of repos to track (auto-discovers if empty)
+#   COLLECTION_DAYS - Days of history per run (default: 28)
+#   DASHBOARD_DAYS - Days of data on dashboard (default: 90)
+
+name: Collect Metrics & Deploy Dashboard
+
+on:
+  schedule:
+    # Run every day at 5:00 AM UTC (midnight ET)
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      collection_days:
+        description: 'Days of history to collect'
+        required: false
+        default: '28'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "metrics-collection"
+  cancel-in-progress: false
+
+jobs:
+  collect-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Collect Copilot metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.METRICS_GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+          GITHUB_REPOS: ${{ vars.GITHUB_REPOS }}
+          COLLECTION_DAYS: ${{ inputs.collection_days || vars.COLLECTION_DAYS || '28' }}
+        run: python scripts/collect_copilot_metrics.py
+
+      - name: Collect PR metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.METRICS_GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+          GITHUB_REPOS: ${{ vars.GITHUB_REPOS }}
+          COLLECTION_DAYS: ${{ inputs.collection_days || vars.COLLECTION_DAYS || '28' }}
+        run: python scripts/collect_pr_metrics.py
+
+      - name: Collect issue metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.METRICS_GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+          GITHUB_REPOS: ${{ vars.GITHUB_REPOS }}
+          COLLECTION_DAYS: ${{ inputs.collection_days || vars.COLLECTION_DAYS || '28' }}
+        run: python scripts/collect_issue_metrics.py
+
+      - name: Generate dashboard data
+        env:
+          DASHBOARD_DAYS: ${{ vars.DASHBOARD_DAYS || '90' }}
+        run: python scripts/generate_site.py
+
+      - name: Commit data updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ site/data/
+          git diff --cached --quiet || git commit -m "chore: update metrics data $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Deploy to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v4

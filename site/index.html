@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copilot Metrics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>📊 Copilot Metrics Dashboard</h1>
+            <p class="subtitle">AI Effectiveness + Developer Health</p>
+            <p class="last-updated" id="lastUpdated"></p>
+        </div>
+    </header>
+
+    <main>
+        <!-- Alerts Banner -->
+        <section id="alertsSection" class="alerts-section hidden">
+            <h2>⚠️ Active Alerts</h2>
+            <div id="alertsList" class="alerts-list"></div>
+        </section>
+
+        <!-- Summary Cards -->
+        <section class="summary-cards">
+            <div class="card" id="cardAcceptanceRate">
+                <div class="card-label">Acceptance Rate</div>
+                <div class="card-value" id="valAcceptanceRate">--</div>
+                <div class="card-detail">Copilot suggestions accepted</div>
+            </div>
+            <div class="card" id="cardActiveUsers">
+                <div class="card-label">Active Users</div>
+                <div class="card-value" id="valActiveUsers">--</div>
+                <div class="card-detail" id="detailActiveUsers">of total seats</div>
+            </div>
+            <div class="card" id="cardPRLifespan">
+                <div class="card-label">PR Lifespan</div>
+                <div class="card-value" id="valPRLifespan">--</div>
+                <div class="card-detail">median hours to merge</div>
+            </div>
+            <div class="card" id="cardTimeToReview">
+                <div class="card-label">Time to Review</div>
+                <div class="card-value" id="valTimeToReview">--</div>
+                <div class="card-detail">median hours to first review</div>
+            </div>
+            <div class="card" id="cardMergeRate">
+                <div class="card-label">Merge Rate</div>
+                <div class="card-value" id="valMergeRate">--</div>
+                <div class="card-detail">PRs merged vs closed</div>
+            </div>
+            <div class="card" id="cardOpenIssues">
+                <div class="card-label">Open Issues</div>
+                <div class="card-value" id="valOpenIssues">--</div>
+                <div class="card-detail" id="detailOpenIssues">across tracked repos</div>
+            </div>
+        </section>
+
+        <!-- Copilot Usage Section -->
+        <section class="chart-section">
+            <h2>Copilot Usage</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>Acceptance Rate Trend</h3>
+                    <canvas id="chartAcceptanceRate"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Active & Engaged Users</h3>
+                    <canvas id="chartActiveUsers"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Suggestions & Acceptances</h3>
+                    <canvas id="chartSuggestions"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Chat Activity</h3>
+                    <canvas id="chartChat"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seat Utilization Section -->
+        <section class="chart-section">
+            <h2>Seat Utilization</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>Seat Allocation Over Time</h3>
+                    <canvas id="chartSeats"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Language Breakdown</h3>
+                    <canvas id="chartLanguages"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- PR Health Section -->
+        <section class="chart-section">
+            <h2>Pull Request Health</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>PR Lifespan Trend</h3>
+                    <canvas id="chartPRLifespan"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Time to First Review</h3>
+                    <canvas id="chartTTFR"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Weekly PR Throughput</h3>
+                    <canvas id="chartPRThroughput"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Merge Rate Trend</h3>
+                    <canvas id="chartMergeRate"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Issue Health Section -->
+        <section class="chart-section">
+            <h2>Issue Health</h2>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3>Open & Stale Issues</h3>
+                    <canvas id="chartIssues"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Issue Lifespan Trend</h3>
+                    <canvas id="chartIssueLifespan"></canvas>
+                </div>
+                <div class="chart-container wide">
+                    <h3>Weekly Issue Throughput (Opened vs. Closed)</h3>
+                    <canvas id="chartIssueThroughput"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>
+            Generated by <a href="https://github.com/jmassardo/copilot-metrics-dashboard">copilot-metrics-dashboard</a>.
+            Data collected via GitHub REST API.
+        </p>
+    </footer>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
